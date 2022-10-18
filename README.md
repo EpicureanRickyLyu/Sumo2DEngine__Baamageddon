@@ -1,6 +1,6 @@
 # Baamageddon
 * Move Attribute from MainGame.cpp to MainGame.hpp
-* Add GameObject folder for scripts arrangement
+* Add GameObject folder for All new GameObject hpp
 * Enabled LFS for Repo
 * Add VS .gitignore
 ## Achieved Feature (Editor and MainGame)
