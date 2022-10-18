@@ -10,6 +10,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 #define PLAY_IMPLEMENTATION
 #define PLAY_USING_GAMEOBJECT_MANAGER
+
 #include "Play.h"
 
 constexpr int DISPLAY_WIDTH = 1280;
@@ -31,26 +32,43 @@ constexpr const char* DOUGHNUT_SPRITE_NAME = "spr_doughnut_12";
 
 constexpr int FLOOR_BOUND = DISPLAY_HEIGHT * 2;
 
+//*****************NEW WORK*****************
+constexpr const char* SPIKES_SPRITE_NAME = "spr_spikes";
+constexpr const char* SPNNINGBLADE_SPRITE_NAME = "spr_spinning_blade";
+constexpr const char* MARKER_SPRITE_NAME = "spr_invisible_marker";
+constexpr const char* EXITDOUGHNUT_SPRITE_NAME = "level_exit";
+
 enum GameObjectType
 {
 	TYPE_NOONE = -1,
 	TYPE_SHEEP,
 	TYPE_ISLAND,
 	TYPE_DOUGHNUT,
+	//***********NEW Type***********
+	TYPE_SPIKES,
+	TYPE_SPINNINGBLADE,
+	TYPE_MARKER,
+	TYPE_EXIT,
+	//***********NEW Type***********
 	TOTAL_TYPES
 };
-
+						//****CHANGE NUMBER*****
 const char* SPRITE_NAMES[TOTAL_TYPES][4] =
 {
 	{ SHEEP_SPRITE_NAME, SHEEP_SPRITE_NAME, SHEEP_SPRITE_NAME, SHEEP_SPRITE_NAME },
 	{ ISLAND_A_SPRITE_NAME, ISLAND_B_SPRITE_NAME, ISLAND_C_SPRITE_NAME, ISLAND_D_SPRITE_NAME },
 	{ DOUGHNUT_SPRITE_NAME, DOUGHNUT_SPRITE_NAME, DOUGHNUT_SPRITE_NAME, DOUGHNUT_SPRITE_NAME },
+	//********************NEW NAME*****************
+	{ SPIKES_SPRITE_NAME,SPIKES_SPRITE_NAME,SPIKES_SPRITE_NAME,SPIKES_SPRITE_NAME },
+	{ SPNNINGBLADE_SPRITE_NAME,SPNNINGBLADE_SPRITE_NAME,SPNNINGBLADE_SPRITE_NAME,SPNNINGBLADE_SPRITE_NAME },
+	{ MARKER_SPRITE_NAME,MARKER_SPRITE_NAME,MARKER_SPRITE_NAME,MARKER_SPRITE_NAME },
+	{ EXITDOUGHNUT_SPRITE_NAME,EXITDOUGHNUT_SPRITE_NAME,EXITDOUGHNUT_SPRITE_NAME,EXITDOUGHNUT_SPRITE_NAME },
 };
 
 struct EditorState
 {
 	int score = 0;
-	GameObjectType editMode = TYPE_SHEEP;
+	GameObjectType editMode = TYPE_SPIKES;
 	Point2f cameraTarget{ 0.0f, 0.0f };
 	float zoom = 1.0f;
 	int selectedObj = -1;
@@ -127,10 +145,10 @@ void HandleControls( void )
 	if( Play::KeyDown( VK_DOWN ) )
 		editorState.cameraTarget.y += CAMERA_SPEED / editorState.zoom;
 
-	if( Play::KeyPressed( VK_OEM_MINUS ) )
+	if( Play::KeyPressed( VK_OEM_MINUS ) )// -
 		editorState.zoom -= 0.1f;
 
-	if( Play::KeyPressed( VK_OEM_PLUS ) )
+	if( Play::KeyPressed( VK_OEM_PLUS ) )// +
 		editorState.zoom += 0.1f;
 
 	if( editorState.zoom < 0.2f )
@@ -145,7 +163,13 @@ void HandleControls( void )
 		{
 			case TYPE_SHEEP: editorState.editMode = TYPE_ISLAND; break;
 			case TYPE_ISLAND: editorState.editMode = TYPE_DOUGHNUT; break;
-			case TYPE_DOUGHNUT: editorState.editMode = TYPE_SHEEP; break;
+			case TYPE_DOUGHNUT: editorState.editMode = TYPE_SPIKES; break;
+				//*****************NEW EDITMODE*****************
+			case TYPE_SPIKES: editorState.editMode = TYPE_SPINNINGBLADE; break;
+			case TYPE_SPINNINGBLADE: editorState.editMode = TYPE_MARKER; break;
+			case TYPE_MARKER: editorState.editMode = TYPE_EXIT; break;
+			case TYPE_EXIT: editorState.editMode = TYPE_SHEEP; break;
+			
 		}
 		editorState.selectedObj = -1;
 	}
@@ -231,6 +255,12 @@ void DrawScene( void )
 	DrawObjectsOfType( TYPE_ISLAND );
 	DrawObjectsOfType( TYPE_DOUGHNUT );
 	DrawObjectsOfType( TYPE_SHEEP );
+	//*****************Draw new static img*****************
+	DrawObjectsOfType(TYPE_SPIKES);
+	DrawObjectsOfType(TYPE_SPINNINGBLADE);
+	DrawObjectsOfType(TYPE_MARKER);
+	DrawObjectsOfType(TYPE_EXIT);
+
 
 	if( editorState.selectedObj != -1 )
 	{
@@ -254,6 +284,11 @@ void DrawUserInterface( void )
 		case TYPE_SHEEP: sMode = "PLAYER"; break;
 		case TYPE_ISLAND: sMode = "ISLANDS"; break;
 		case TYPE_DOUGHNUT: sMode = "DONUTS"; break;
+		//*****************Draw new static img*****************
+		case TYPE_SPIKES: sMode = "SPIKES"; break;
+		case TYPE_SPINNINGBLADE: sMode = "SPINNINGBLADE"; break;
+		case TYPE_MARKER: sMode = "MARKER"; break;
+		case TYPE_EXIT: sMode = "EXIT"; break;
 	}
 
 	Play::DrawRect( { 0, 0 }, { DISPLAY_WIDTH, 50 }, Play::cYellow, true );
@@ -342,6 +377,15 @@ void LoadLevel( void )
 
 		if( sType == "TYPE_DOUGHNUT" )
 			Play::CreateGameObject( TYPE_DOUGHNUT, { std::stof( sX ), std::stof( sY ) }, 30, sSprite.c_str() );
+		//*****************Load new File*****************
+		if (sType == "TYPE_SPIKES")
+			Play::CreateGameObject(	TYPE_SPIKES, { std::stof(sX), std::stof(sY) }, 50, sSprite.c_str());//COLLISION RADIUS
+		if (sType == "TYPE_SPINNINGBLADE")
+			Play::CreateGameObject(TYPE_SPINNINGBLADE, { std::stof(sX), std::stof(sY) }, 50, sSprite.c_str());//COLLISION RADIUS
+		if (sType == "TYPE_MARKER")
+			Play::CreateGameObject(TYPE_MARKER, { std::stof(sX), std::stof(sY) }, 30, sSprite.c_str());//COLLISION RADIUS
+		if (sType == "TYPE_EXIT")
+			Play::CreateGameObject(TYPE_EXIT, { std::stof(sX), std::stof(sY) }, 60, sSprite.c_str());//COLLISION RADIUS
 	}
 
 	levelfile.close();
@@ -369,6 +413,19 @@ void SaveLevel( void )
 				break;
 			case TYPE_DOUGHNUT:
 				levelfile << "TYPE_DOUGHNUT\n";
+				break;
+			//*****************Load new File*****************
+			case TYPE_SPIKES:
+				levelfile << "TYPE_SPIKES\n";
+				break;
+			case TYPE_SPINNINGBLADE:
+				levelfile << "TYPE_SPINNINGBLADE\n";
+				break;
+			case TYPE_MARKER:
+				levelfile << "TYPE_MARKER\n";
+				break;
+			case TYPE_EXIT:
+				levelfile << "TYPE_EXIT\n";
 				break;
 
 		}

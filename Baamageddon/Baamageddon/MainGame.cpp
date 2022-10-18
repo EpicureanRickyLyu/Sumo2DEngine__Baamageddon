@@ -6,51 +6,9 @@
 #define PLAY_IMPLEMENTATION
 #define PLAY_USING_GAMEOBJECT_MANAGER
 
-//-------------------------------------------------------------------------
-
-#include "Play.h"
-#include "AABB.h"
-#include "MainGame.h"
-
-//-------------------------------------------------------------------------
-
-constexpr int DISPLAY_WIDTH = 1280;
-constexpr int DISPLAY_HEIGHT = 720;
-constexpr int DISPLAY_SCALE = 1;
-
-constexpr float SHEEP_WALK_SPEED = 5.0f;
-constexpr float SHEEP_JUMP_IMPULSE = 14.f;
-
-constexpr const char* SHEEP_IDLE_LEFT_SPRITE_NAME = "spr_sheep1_idle_left";
-constexpr const char* SHEEP_IDLE_RIGHT_SPRITE_NAME = "spr_sheep1_idle_right";
-constexpr const char* SHEEP_WALK_LEFT_SPRITE_NAME = "spr_sheep1_walk_left";
-constexpr const char* SHEEP_WALK_RIGHT_SPRITE_NAME = "spr_sheep1_walk_right";
-constexpr const char* SHEEP_JUMP_LEFT_SPRITE_NAME = "spr_sheep1_jump_left";
-constexpr const char* SHEEP_JUMP_RIGHT_SPRITE_NAME = "spr_sheep1_jump_right";
-
-constexpr const char* ISLAND_A_SPRITE_NAME = "spr_island_A";
-constexpr const char* ISLAND_B_SPRITE_NAME = "spr_island_B";
-constexpr const char* ISLAND_C_SPRITE_NAME = "spr_island_C";
-constexpr const char* ISLAND_D_SPRITE_NAME = "spr_island_D";
-
-const Point2f SHEEP_COLLISION_HALFSIZE = { 40,40 };
-
-constexpr const char* DOUGHNUT_SPRITE_NAME = "spr_doughnut_12";
-constexpr const char* SPRINKLE_SPRITE_NAME = "spr_sprinkle";
-constexpr const char* SCORE_TAB_SPRITE_NAME = "spr_score_tab";
-
-constexpr int LEFT_SCREEN_BOUND = 100;
-constexpr int RIGHT_SCREEN_BOUND = DISPLAY_WIDTH - LEFT_SCREEN_BOUND;
-
-constexpr int FLOOR_BOUND = DISPLAY_HEIGHT * 2;
-
-
-//-------------------------------------------------------------------------
-
-static GameState gameState;
-
-
-//-------------------------------------------------------------------------
+//NewGameObject Content
+#include "GameObject/SpikesTest.h"
+#include "GameObject/SpinningBlade.h"
 // The entry point for a PLay program
 void MainGameEntry( PLAY_IGNORE_COMMAND_LINE )
 {
@@ -83,6 +41,9 @@ bool MainGameUpdate(float elapsedTime)
 	Play::ColourTimingBar( Play::cGreen );
 	UpdateDoughnuts();
 	UpdateSprinkles();
+	//********New Update**********
+	UpdateSpikes();
+	UpdateSpinningBlade();
 
 	Play::SetDrawingSpace( Play::SCREEN );
 	Play::DrawSprite( Play::GetSpriteId( SCORE_TAB_SPRITE_NAME ), { DISPLAY_WIDTH / 2, 35 }, 0 );
@@ -158,6 +119,9 @@ void DrawScene()
 	DrawObjectsOfType( TYPE_ISLAND );
 	DrawObjectsOfType( TYPE_DOUGHNUT );
 	DrawObjectsOfType( TYPE_SPRINKLE );
+	//*****************Draw static spikes*****************
+	DrawObjectsOfType( TYPE_SPIKES );
+	//DrawObjectsOfType( TYPE_SPINNINGBLADE );
 }
 
 //-------------------------------------------------------------------------
@@ -448,7 +412,7 @@ void UpdateGamePlayState()
 		break;
 
 	case STATE_DEAD:
-		Play::DestroyGameObjectsByType( TYPE_DOUGHNUT );
+		//Play::DestroyGameObjectsByType( TYPE_DOUGHNUT );
 
 		gameState.playState = STATE_WAIT;
 
@@ -563,6 +527,13 @@ void LoadLevel( void )
 
 		if( sType == "TYPE_DOUGHNUT" )
 			Play::CreateGameObject( TYPE_DOUGHNUT, { std::stof( sX ), std::stof( sY ) }, 30, sSprite.c_str() );
+		//***************NEW DRAW****************
+		if (sType == "TYPE_SPIKES")
+			Play::CreateGameObject( TYPE_SPIKES, { std::stof(sX), std::stof(sY) }, 50, sSprite.c_str());//Collision radius
+		if (sType == "TYPE_SPINNINGBLADE")
+			Play::CreateGameObject( TYPE_SPINNINGBLADE, { std::stof(sX), std::stof(sY) }, 50, sSprite.c_str());//Collision radius
+		if (sType == "TYPE_MARKER")
+			Play::CreateGameObject( TYPE_MARKER, { std::stof(sX), std::stof(sY) }, 30, sSprite.c_str());//Collision radius
 	}
 
 	levelfile.close();
