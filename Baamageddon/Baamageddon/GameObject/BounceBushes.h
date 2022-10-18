@@ -1,6 +1,5 @@
 #pragma once
 #include "../MainGame.h"
-
 void UpdateBouceBushes()
 {
 	GameObject& obj_sheep = Play::GetGameObjectByType(TYPE_SHEEP);
@@ -15,7 +14,7 @@ void UpdateBouceBushes()
 		{
 			if (!hasCollided)
 			{
-				obj_sheep.velocity.y = -SHEEP_JUMP_IMPULSE;
+				obj_sheep.velocity.y = -20.0f;//jump 14
 				Play::SetSprite(obj_bush, BOUNCYBUSH_SPRITE_NAME, 8.0f);
 				Play::PlayAudio("munch");
 			}

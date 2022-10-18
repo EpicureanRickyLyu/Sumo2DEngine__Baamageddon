@@ -1,6 +1,6 @@
 ﻿  MainGame.cpp
   Generating code
   Previous IPDB and IOBJ mismatch, fall back to full compilation.
-  All 1394 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  All 1453 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   Finished generating code
   Baamageddon.vcxproj -> F:\UnrealEngine\Baamageddon 2022\Sumo_Assessment_Baamageddon\Baamageddon\Baamageddon\Build\x64\Release\Baamageddon.exe

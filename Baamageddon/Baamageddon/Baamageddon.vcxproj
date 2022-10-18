@@ -202,6 +202,8 @@
     <ClInclude Include="GameObject\BounceBushes.h" />
     <ClInclude Include="GameObject\ExitDoughnut.h" />
     <ClInclude Include="GameObject\SpinningBlade.h" />
+    <ClInclude Include="GameObject\SwingingBlade.h" />
+    <ClInclude Include="GameObject\Wolf.h" />
     <ClInclude Include="MainGame.h" />
     <ClInclude Include="GameObject\PlatForm.h" />
     <ClInclude Include="GameObject\SpikesTest.h" />

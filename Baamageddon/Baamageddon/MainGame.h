@@ -102,10 +102,12 @@ enum GameObjectType
 
 //-------------------------------------------------------------------------
 
+//ID Can't get GameObject don't know why...
 struct Platform
 {
 	AABB box;
 	int platform_id;
+	Vector2D Pos;
 };
 
 //-------------------------------------------------------------------------
@@ -120,7 +122,7 @@ struct GameState
 	Point2f cameraTarget{ 0.0f, 0.0f };
 	//properties
 	int DoughnutsNum = 0;
-	int BouncePlatformid = -1;
+	Vector2D BouncePlatformPos;
 }; 
 
 //-------------------------------------------------------------------------

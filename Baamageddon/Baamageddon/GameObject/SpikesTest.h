@@ -1,6 +1,5 @@
 #pragma once
 #include "../MainGame.h"
-
 void UpdateSpikes()
 {
 	GameObject& obj_sheep = Play::GetGameObjectByType(TYPE_SHEEP);

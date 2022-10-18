@@ -1,2 +1,3 @@
 ﻿  MainGame.cpp
+F:\UnrealEngine\Baamageddon 2022\Sumo_Assessment_Baamageddon\Baamageddon\Baamageddon\GameObject\ExitDoughnut.h(16,43): warning C4305: 'initializing': truncation from 'double' to 'float'
   Baamageddon.vcxproj -> F:\UnrealEngine\Baamageddon 2022\Sumo_Assessment_Baamageddon\Baamageddon\Baamageddon\Build\x64\Debug\Baamageddon.exe

@@ -12,6 +12,8 @@
 #include "GameObject/ExitDoughnut.h"
 #include "GameObject/PlatForm.h"
 #include "GameObject/BounceBushes.h"
+#include "GameObject/Wolf.h"
+#include "GameObject/SwingingBlade.h"
 // The entry point for a PLay program
 void MainGameEntry( PLAY_IGNORE_COMMAND_LINE )
 {
@@ -24,6 +26,8 @@ void MainGameEntry( PLAY_IGNORE_COMMAND_LINE )
 	CreatePlatforms();
 	gameState.cameraTarget = Point2f( DISPLAY_WIDTH, DISPLAY_HEIGHT ) - Point2f( DISPLAY_WIDTH / 2.0f, DISPLAY_HEIGHT / 2.0f);
 	Play::SetCameraPosition( gameState.cameraTarget );
+	//Move Origin For SwingBlade
+	IntilizeSwingBlade();
 }
 
 //-------------------------------------------------------------------------
@@ -52,6 +56,9 @@ bool MainGameUpdate(float elapsedTime)
 	UpdateSpinningBlade();
 	UpdateExitDoughnut();
 	UpdateBouceBushes();
+	UpdateLeftWolf();
+	UpdateRighttWolf();
+	UpdateSwingBlade();
 
 
 	Play::SetDrawingSpace( Play::SCREEN );
@@ -84,25 +91,25 @@ void CreatePlatforms( void )
 
 		if( obj_platform.spriteId == Play::GetSpriteId( ISLAND_A_SPRITE_NAME ) )
 		{
-			Platform p = { { obj_platform.pos + Point2f( 24, 12 ), { 116, 15 } }, id_platform };
+			Platform p = { { obj_platform.pos + Point2f( 24, 12 ), { 116, 15 } }, id_platform, obj_platform.pos };
 			gameState.vPlatforms.push_back( p );
 		}
 
 		if( obj_platform.spriteId == Play::GetSpriteId( ISLAND_B_SPRITE_NAME ) )
 		{
-			Platform p = { { obj_platform.pos + Point2f( 0, 10 ), { 250, 15 } }, id_platform };
+			Platform p = { { obj_platform.pos + Point2f( 0, 10 ), { 250, 15 } }, id_platform, obj_platform.pos };
 			gameState.vPlatforms.push_back( p );
 		}
 
 		if( obj_platform.spriteId == Play::GetSpriteId( ISLAND_C_SPRITE_NAME ) )
 		{
-			Platform p = { { obj_platform.pos + Point2f( 0, 70 ), { 250, 15 } }, id_platform };
+			Platform p = { { obj_platform.pos + Point2f( 0, 70 ), { 250, 15 } }, id_platform ,obj_platform.pos };
 			gameState.vPlatforms.push_back( p );
 		}
 
 		if( obj_platform.spriteId == Play::GetSpriteId( ISLAND_D_SPRITE_NAME ) )
 		{
-			Platform p = { { obj_platform.pos + Point2f( 10, 50 ), { 200, 15 } }, id_platform };
+			Platform p = { { obj_platform.pos + Point2f( 10, 50 ), { 200, 15 } }, id_platform ,obj_platform.pos };
 			gameState.vPlatforms.push_back( p );
 		}
 	}
@@ -139,7 +146,8 @@ void DrawScene()
 void HandlePlatformCollision(GameObject& obj_sheep)
 {
 	AABB sheepAABB = { obj_sheep.pos, SHEEP_COLLISION_HALFSIZE };
-
+	//debug
+	DrawCollisionBounds(obj_sheep);
 	int hitCount = 0;
 
 	for (const Platform& rPlatform : gameState.vPlatforms )
@@ -167,10 +175,9 @@ void HandlePlatformCollision(GameObject& obj_sheep)
 			{
 
 				obj_sheep.pos = positionOut;
-				///get paltform id
-				int id = rPlatform.platform_id;
-				gameState.BouncePlatformid = id;
-				//Play::DrawFontText("64px", std::to_string(id), { DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2 }, Play::CENTRE);
+				///get paltform Pos
+				gameState.BouncePlatformPos = rPlatform.Pos;
+				
 				OnJumpAheadToPlatForm = true;
 				// Sheep heading down onto a platform
 				if( obj_sheep.velocity.y > 0.0f )
@@ -245,19 +252,21 @@ void DisplayDebugInfo(GameObject& obj_sheep)
 
 	Play::SetDrawingSpace( Play::WORLD );
 }
-
+bool isJumping = false;
 //-------------------------------------------------------------------------
 void SetAirborne(GameObject& obj_sheep)
 {
 	gameState.sheepState = STATE_AIRBORNE;
+	//--------------Long Jump------------
+	obj_sheep.acceleration = { 0.f, 2.0f };	// Gravity
 
-	obj_sheep.acceleration = { 0.f, 0.5f };	// Gravity
 }
 
 //-------------------------------------------------------------------------
+
 void UpdateSheep(GameObject& obj_sheep)
 {
-
+	DisplayDebugInfo(obj_sheep);
 	switch (gameState.sheepState)
 	{
 	case STATE_IDLE: // fall through
@@ -284,14 +293,18 @@ void UpdateSheep(GameObject& obj_sheep)
 			obj_sheep.velocity.x *= 0.5;
 			obj_sheep.acceleration = { 0, 0 };
 		}
-
+		//--------------Long Jump------------
 		if (Play::KeyPressed(VK_SPACE))
 		{
-			Play::SetSprite(obj_sheep, gameState.sheepDirection ? SHEEP_JUMP_RIGHT_SPRITE_NAME : SHEEP_JUMP_LEFT_SPRITE_NAME, 1.f);
-			obj_sheep.velocity.y = -SHEEP_JUMP_IMPULSE;
-			SetAirborne(obj_sheep);
-			RandomBaa();
+			if (!isJumping)
+			{
+				Play::SetSprite(obj_sheep, gameState.sheepDirection ? SHEEP_JUMP_RIGHT_SPRITE_NAME : SHEEP_JUMP_LEFT_SPRITE_NAME, 1.f);
+				obj_sheep.velocity.y = -22.0f;
+				SetAirborne(obj_sheep);
+				RandomBaa();
+			}
 		}
+
 	} break;
 
 	case STATE_AIRBORNE:
@@ -306,6 +319,18 @@ void UpdateSheep(GameObject& obj_sheep)
 			obj_sheep.velocity.x = SHEEP_WALK_SPEED;
 			Play::SetSprite(obj_sheep, SHEEP_JUMP_RIGHT_SPRITE_NAME, 1.0f);
 		}
+		//--------------Long Jump------------
+		if (Play::KeyDown(VK_SPACE))
+		{
+	
+			obj_sheep.acceleration.y -= 0.2f;
+			if (obj_sheep.acceleration.y <= 0.4f)
+			{
+				obj_sheep.acceleration.y = 0.4f;
+			}
+
+		}
+
 	} break;
 	};
 
@@ -314,6 +339,7 @@ void UpdateSheep(GameObject& obj_sheep)
 	case STATE_IDLE:
 		obj_sheep.acceleration = { 0, 0 };
 		obj_sheep.velocity = { 0, 0 };
+		isJumping = false;
 		break;
 	case STATE_WALKING:
 		// check platform collision and enter idle or falling/jumping.
@@ -348,6 +374,11 @@ void UpdateSprinkles()
 		if (!Play::IsVisible(obj_sprinkle))
 			Play::DestroyGameObject(id_sprinkle);
 	}
+}
+
+void UpdateDestroyed()
+{
+
 }
 
 //-------------------------------------------------------------------------
@@ -413,6 +444,10 @@ void UpdateGamePlayState()
 		return;
 
 	case STATE_APPEAR:
+		//Initilize Game
+		InitializeBlade();
+		//
+
 		obj_sheep.velocity = { 0, 0 };
 		obj_sheep.acceleration = { 0, 0.5f };
 		Play::SetSprite(obj_sheep, SHEEP_JUMP_RIGHT_SPRITE_NAME, 0);
@@ -446,7 +481,8 @@ void UpdateGamePlayState()
 		if (Play::KeyPressed(VK_SPACE) == true)
 		{
 			//reset game
-			isBladeSpeedInitialize = false;
+			InitializeBlade();
+
 			gameState.playState = STATE_START;
 			gameState.score = 0;
 		}
@@ -565,9 +601,9 @@ void LoadLevel( void )
 		if (sType == "TYPE_SWINGBLADE")
 			Play::CreateGameObject(TYPE_SWINGBLADE, { std::stof(sX), std::stof(sY) }, 40, sSprite.c_str());
 		if (sType == "TYPE_WOLFLEFT")
-			Play::CreateGameObject(TYPE_WOLFLEFT, { std::stof(sX), std::stof(sY) }, 40, sSprite.c_str());
+			Play::CreateGameObject(TYPE_WOLFLEFT, { std::stof(sX), std::stof(sY) }, 60, sSprite.c_str());
 		if (sType == "TYPE_WOLFRIGHT")
-			Play::CreateGameObject(TYPE_WOLFRIGHT, { std::stof(sX), std::stof(sY) }, 40, sSprite.c_str());
+			Play::CreateGameObject(TYPE_WOLFRIGHT, { std::stof(sX), std::stof(sY) }, 60, sSprite.c_str());
 	
 	}
 

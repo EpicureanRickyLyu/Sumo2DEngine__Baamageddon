@@ -217,6 +217,9 @@ void HandleControls( void )
 					case TYPE_SHEEP:
 						Play::GetGameObjectByType( TYPE_SHEEP ).pos = mouseWorldPos;
 						break;
+					case TYPE_EXIT:
+						Play::GetGameObjectByType(TYPE_EXIT).pos = mouseWorldPos;
+						break;
 					default:
 						editorState.selectedObj = Play::CreateGameObject( editorState.editMode, mouseWorldSnapPos, 50, SPRITE_NAMES[static_cast<int>( editorState.editMode )][0] );
 						editorState.selectedOffset = { 0.0f, 0.0f };
@@ -255,7 +258,7 @@ void HandleControls( void )
 			GameObject& obj = Play::GetGameObject( id );
 			if( PointInsideSpriteBounds( mouseWorldPos, obj ) )
 			{
-				if( obj.type != TYPE_SHEEP )
+				if( obj.type != TYPE_SHEEP && obj.type != TYPE_EXIT)
 					Play::DestroyGameObject( id );
 			}
 		}

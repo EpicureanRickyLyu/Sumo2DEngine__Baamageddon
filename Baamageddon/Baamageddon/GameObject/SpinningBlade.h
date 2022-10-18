@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../MainGame.h"
-bool isBladeSpeedInitialize = false;
 Vector2D BladeSpeed = { -1.0f ,0 };
 void InitializeBlade()
 {
@@ -13,7 +12,7 @@ void InitializeBlade()
 		obj_blade.velocity = BladeSpeed;
 		obj_blade.rotSpeed = 3.0f;
 	}
-	isBladeSpeedInitialize = true;
+
 }
 void UpdateSpinningBlade()
 {
@@ -23,8 +22,7 @@ void UpdateSpinningBlade()
 	std::vector<int> obj_Markers = Play::CollectGameObjectIDsByType(TYPE_MARKER);
 	/*if (gameState.playState == PlayState::STATE_WAIT)
 		return;*/
-	if(!isBladeSpeedInitialize)
-	InitializeBlade();
+
 	for (int id_balde : obj_SpinningBlades)
 	{
 		GameObject& obj_blade = Play::GetGameObject(id_balde);
