@@ -1,5 +1,4 @@
-# Sumo_Assessment_Baamageddon
-SumoApprenticeAssessment2022
+# Baamageddon
 * Move Attribute from MainGame.cpp to MainGame.hpp
 * Add GameObject folder for scripts arrangement
 * Enabled LFS for Repo
