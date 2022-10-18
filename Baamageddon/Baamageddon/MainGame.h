@@ -44,7 +44,12 @@ constexpr int FLOOR_BOUND = DISPLAY_HEIGHT * 2;
 
 //*****************New GameObject Image*****************
 constexpr const char* SPIKES_SPRITE_NAME = "spr_spikes";
-constexpr const char* SPNNINGBLADE_SPRITE_NAME = "spr_spikes";
+constexpr const char* SPNNINGBLADE_SPRITE_NAME = "spr_spinning_blade";
+constexpr const char* EXITDOUGHNUT_SPRITE_NAME = "level_exit";
+constexpr const char* BOUNCYBUSH_SPRITE_NAME = "spr_bouncy_bush_4";
+constexpr const char* SWINGINGBLADE_SPRITE_NAME = "spr_swinging_blade";
+constexpr const char* WORFLEFT_SPRITE_NAME = "spr_wolf_left_3";
+constexpr const char* WORFRIGHT_SPRITE_NAME = "spr_wolf_right_3";
 
 //-------------------------------------------------------------------------
 
@@ -88,6 +93,11 @@ enum GameObjectType
 	TYPE_SPIKES,
 	TYPE_SPINNINGBLADE,
 	TYPE_MARKER,
+	TYPE_EXIT,
+	TYPE_BOUNCEBUSHES,
+	TYPE_SWINGBLADE,
+	TYPE_WOLFLEFT,
+	TYPE_WOLFRIGHT,
 }; 
 
 //-------------------------------------------------------------------------
@@ -108,6 +118,9 @@ struct GameState
 	SheepDirection sheepDirection = DIRECTION_RIGHT;
 	std::vector< Platform > vPlatforms;
 	Point2f cameraTarget{ 0.0f, 0.0f };
+	//properties
+	int DoughnutsNum = 0;
+	int BouncePlatformid = -1;
 }; 
 
 //-------------------------------------------------------------------------

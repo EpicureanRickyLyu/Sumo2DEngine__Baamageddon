@@ -21,8 +21,8 @@ void UpdateSpinningBlade()
 	std::vector<int> obj_SpinningBlades = Play::CollectGameObjectIDsByType(TYPE_SPINNINGBLADE);
 	//std::vector<int> obj_Hazards = Play::CollectGameObjectIDsByType(TYPE_);
 	std::vector<int> obj_Markers = Play::CollectGameObjectIDsByType(TYPE_MARKER);
-	if (gameState.playState == PlayState::STATE_WAIT)
-		return;
+	/*if (gameState.playState == PlayState::STATE_WAIT)
+		return;*/
 	if(!isBladeSpeedInitialize)
 	InitializeBlade();
 	for (int id_balde : obj_SpinningBlades)

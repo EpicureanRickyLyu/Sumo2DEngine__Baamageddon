@@ -9,6 +9,9 @@
 //NewGameObject Content
 #include "GameObject/SpikesTest.h"
 #include "GameObject/SpinningBlade.h"
+#include "GameObject/ExitDoughnut.h"
+#include "GameObject/PlatForm.h"
+#include "GameObject/BounceBushes.h"
 // The entry point for a PLay program
 void MainGameEntry( PLAY_IGNORE_COMMAND_LINE )
 {
@@ -34,7 +37,10 @@ bool MainGameUpdate(float elapsedTime)
 	Play::SetCameraPosition( Play::GetCameraPosition() + cameraDiff/8.0f );
 
 	Play::BeginTimingBar( Play::cBlue );
+
+
 	DrawScene();
+
 
 	Play::ColourTimingBar( Play::cRed );
 	UpdateGamePlayState();
@@ -44,6 +50,9 @@ bool MainGameUpdate(float elapsedTime)
 	//********New Update**********
 	UpdateSpikes();
 	UpdateSpinningBlade();
+	UpdateExitDoughnut();
+	UpdateBouceBushes();
+
 
 	Play::SetDrawingSpace( Play::SCREEN );
 	Play::DrawSprite( Play::GetSpriteId( SCORE_TAB_SPRITE_NAME ), { DISPLAY_WIDTH / 2, 35 }, 0 );
@@ -116,7 +125,9 @@ void DrawScene()
 
 	Play::ColourTimingBar( Play::cYellow );
 
-	DrawObjectsOfType( TYPE_ISLAND );
+	//********Update Platform**********
+	UpdatePlatForm();
+	//DrawObjectsOfType( TYPE_ISLAND );
 	DrawObjectsOfType( TYPE_DOUGHNUT );
 	DrawObjectsOfType( TYPE_SPRINKLE );
 	//*****************Draw static spikes*****************
@@ -154,7 +165,13 @@ void HandlePlatformCollision(GameObject& obj_sheep)
 		{
 			if (AABBSweepTest(rPlatform.box, sheepAABB, { 0.f, obj_sheep.velocity.y }, positionOut))
 			{
+
 				obj_sheep.pos = positionOut;
+				///get paltform id
+				int id = rPlatform.platform_id;
+				gameState.BouncePlatformid = id;
+				//Play::DrawFontText("64px", std::to_string(id), { DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2 }, Play::CENTRE);
+				OnJumpAheadToPlatForm = true;
 				// Sheep heading down onto a platform
 				if( obj_sheep.velocity.y > 0.0f )
 				{
@@ -165,6 +182,7 @@ void HandlePlatformCollision(GameObject& obj_sheep)
 				}
 				else // Sheep heading up into a platform
 				{
+
 					obj_sheep.pos.y += 1;
 					obj_sheep.velocity.y = 0.f;
 				}
@@ -186,6 +204,7 @@ void HandlePlatformCollision(GameObject& obj_sheep)
 		{
 			return;
 		}
+
 	}
 
 	// We missed all platforms
@@ -336,7 +355,7 @@ void UpdateDoughnuts()
 {
 	GameObject& obj_sheep = Play::GetGameObjectByType(TYPE_SHEEP);
 	std::vector<int> vDoughnuts = Play::CollectGameObjectIDsByType(TYPE_DOUGHNUT);
-
+	int doughnutsNums = 0;
 	for (int id_doughnut : vDoughnuts)
 	{
 		GameObject& obj_doughnut = Play::GetGameObject(id_doughnut);
@@ -359,10 +378,13 @@ void UpdateDoughnuts()
 		}
 
 		Play::UpdateGameObject(obj_doughnut);
-
 		if (hasCollided)
 			Play::DestroyGameObject(id_doughnut);
+		doughnutsNums++;
 	}
+	//Record nums in game state
+	gameState.DoughnutsNum = doughnutsNums;
+
 }
 
 
@@ -423,6 +445,8 @@ void UpdateGamePlayState()
 		obj_sheep.velocity.y += 1.f;
 		if (Play::KeyPressed(VK_SPACE) == true)
 		{
+			//reset game
+			isBladeSpeedInitialize = false;
 			gameState.playState = STATE_START;
 			gameState.score = 0;
 		}
@@ -534,6 +558,17 @@ void LoadLevel( void )
 			Play::CreateGameObject( TYPE_SPINNINGBLADE, { std::stof(sX), std::stof(sY) }, 50, sSprite.c_str());//Collision radius
 		if (sType == "TYPE_MARKER")
 			Play::CreateGameObject( TYPE_MARKER, { std::stof(sX), std::stof(sY) }, 30, sSprite.c_str());//Collision radius
+		if (sType == "TYPE_EXIT")
+			Play::CreateGameObject(TYPE_EXIT, { std::stof(sX), std::stof(sY) }, 60, sSprite.c_str());//Collision radius
+		if (sType == "TYPE_BOUNCEBUSHES")
+			Play::CreateGameObject(TYPE_BOUNCEBUSHES, { std::stof(sX), std::stof(sY) }, 40, sSprite.c_str());
+		if (sType == "TYPE_SWINGBLADE")
+			Play::CreateGameObject(TYPE_SWINGBLADE, { std::stof(sX), std::stof(sY) }, 40, sSprite.c_str());
+		if (sType == "TYPE_WOLFLEFT")
+			Play::CreateGameObject(TYPE_WOLFLEFT, { std::stof(sX), std::stof(sY) }, 40, sSprite.c_str());
+		if (sType == "TYPE_WOLFRIGHT")
+			Play::CreateGameObject(TYPE_WOLFRIGHT, { std::stof(sX), std::stof(sY) }, 40, sSprite.c_str());
+	
 	}
 
 	levelfile.close();

@@ -37,6 +37,10 @@ constexpr const char* SPIKES_SPRITE_NAME = "spr_spikes";
 constexpr const char* SPNNINGBLADE_SPRITE_NAME = "spr_spinning_blade";
 constexpr const char* MARKER_SPRITE_NAME = "spr_invisible_marker";
 constexpr const char* EXITDOUGHNUT_SPRITE_NAME = "level_exit";
+constexpr const char* BOUNCYBUSH_SPRITE_NAME = "spr_bouncy_bush_4";
+constexpr const char* SWINGINGBLADE_SPRITE_NAME = "spr_swinging_blade";
+constexpr const char* WORFLEFT_SPRITE_NAME = "spr_wolf_left_3";
+constexpr const char* WORFRIGHT_SPRITE_NAME = "spr_wolf_right_3";
 
 enum GameObjectType
 {
@@ -49,6 +53,10 @@ enum GameObjectType
 	TYPE_SPINNINGBLADE,
 	TYPE_MARKER,
 	TYPE_EXIT,
+	TYPE_BOUNCEBUSHES,
+	TYPE_SWINGBLADE,
+	TYPE_WOLFLEFT,
+	TYPE_WOLFRIGHT,
 	//***********NEW Type***********
 	TOTAL_TYPES
 };
@@ -63,12 +71,18 @@ const char* SPRITE_NAMES[TOTAL_TYPES][4] =
 	{ SPNNINGBLADE_SPRITE_NAME,SPNNINGBLADE_SPRITE_NAME,SPNNINGBLADE_SPRITE_NAME,SPNNINGBLADE_SPRITE_NAME },
 	{ MARKER_SPRITE_NAME,MARKER_SPRITE_NAME,MARKER_SPRITE_NAME,MARKER_SPRITE_NAME },
 	{ EXITDOUGHNUT_SPRITE_NAME,EXITDOUGHNUT_SPRITE_NAME,EXITDOUGHNUT_SPRITE_NAME,EXITDOUGHNUT_SPRITE_NAME },
+	{ BOUNCYBUSH_SPRITE_NAME,BOUNCYBUSH_SPRITE_NAME,BOUNCYBUSH_SPRITE_NAME,BOUNCYBUSH_SPRITE_NAME },
+	{ SWINGINGBLADE_SPRITE_NAME,SWINGINGBLADE_SPRITE_NAME,SWINGINGBLADE_SPRITE_NAME,SWINGINGBLADE_SPRITE_NAME },
+	{ WORFLEFT_SPRITE_NAME,WORFLEFT_SPRITE_NAME,WORFLEFT_SPRITE_NAME,WORFLEFT_SPRITE_NAME },
+	{ WORFRIGHT_SPRITE_NAME,WORFRIGHT_SPRITE_NAME,WORFRIGHT_SPRITE_NAME,WORFRIGHT_SPRITE_NAME },
+
+
 };
 
 struct EditorState
 {
 	int score = 0;
-	GameObjectType editMode = TYPE_SPIKES;
+	GameObjectType editMode = TYPE_BOUNCEBUSHES;
 	Point2f cameraTarget{ 0.0f, 0.0f };
 	float zoom = 1.0f;
 	int selectedObj = -1;
@@ -168,8 +182,11 @@ void HandleControls( void )
 			case TYPE_SPIKES: editorState.editMode = TYPE_SPINNINGBLADE; break;
 			case TYPE_SPINNINGBLADE: editorState.editMode = TYPE_MARKER; break;
 			case TYPE_MARKER: editorState.editMode = TYPE_EXIT; break;
-			case TYPE_EXIT: editorState.editMode = TYPE_SHEEP; break;
-			
+			case TYPE_EXIT: editorState.editMode = TYPE_BOUNCEBUSHES; break;
+			case TYPE_BOUNCEBUSHES: editorState.editMode = TYPE_SWINGBLADE; break;
+			case TYPE_SWINGBLADE: editorState.editMode = TYPE_WOLFLEFT; break;
+			case TYPE_WOLFLEFT: editorState.editMode = TYPE_WOLFRIGHT; break;
+			case TYPE_WOLFRIGHT: editorState.editMode = TYPE_SHEEP; break;
 		}
 		editorState.selectedObj = -1;
 	}
@@ -260,7 +277,10 @@ void DrawScene( void )
 	DrawObjectsOfType(TYPE_SPINNINGBLADE);
 	DrawObjectsOfType(TYPE_MARKER);
 	DrawObjectsOfType(TYPE_EXIT);
-
+	DrawObjectsOfType(TYPE_BOUNCEBUSHES);
+	DrawObjectsOfType(TYPE_SWINGBLADE);
+	DrawObjectsOfType(TYPE_WOLFLEFT);
+	DrawObjectsOfType(TYPE_WOLFRIGHT);
 
 	if( editorState.selectedObj != -1 )
 	{
@@ -289,6 +309,10 @@ void DrawUserInterface( void )
 		case TYPE_SPINNINGBLADE: sMode = "SPINNINGBLADE"; break;
 		case TYPE_MARKER: sMode = "MARKER"; break;
 		case TYPE_EXIT: sMode = "EXIT"; break;
+		case TYPE_BOUNCEBUSHES: sMode = "BOUNCEBUSHES"; break;
+		case TYPE_SWINGBLADE: sMode = "SWINGBLADE"; break;
+		case TYPE_WOLFLEFT: sMode = "WOLFLEFT"; break;
+		case TYPE_WOLFRIGHT: sMode = "WOLFRIGHT"; break;
 	}
 
 	Play::DrawRect( { 0, 0 }, { DISPLAY_WIDTH, 50 }, Play::cYellow, true );
@@ -386,6 +410,15 @@ void LoadLevel( void )
 			Play::CreateGameObject(TYPE_MARKER, { std::stof(sX), std::stof(sY) }, 30, sSprite.c_str());//COLLISION RADIUS
 		if (sType == "TYPE_EXIT")
 			Play::CreateGameObject(TYPE_EXIT, { std::stof(sX), std::stof(sY) }, 60, sSprite.c_str());//COLLISION RADIUS
+		if (sType == "TYPE_BOUNCEBUSHES")
+			Play::CreateGameObject(TYPE_BOUNCEBUSHES, { std::stof(sX), std::stof(sY) }, 40, sSprite.c_str());
+		if (sType == "TYPE_SWINGBLADE")
+			Play::CreateGameObject(TYPE_SWINGBLADE, { std::stof(sX), std::stof(sY) }, 40, sSprite.c_str());
+		if (sType == "TYPE_WOLFLEFT")
+			Play::CreateGameObject(TYPE_WOLFLEFT, { std::stof(sX), std::stof(sY) }, 40, sSprite.c_str());
+		if (sType == "TYPE_WOLFRIGHT")
+			Play::CreateGameObject(TYPE_WOLFRIGHT, { std::stof(sX), std::stof(sY) }, 40, sSprite.c_str());
+
 	}
 
 	levelfile.close();
@@ -426,6 +459,18 @@ void SaveLevel( void )
 				break;
 			case TYPE_EXIT:
 				levelfile << "TYPE_EXIT\n";
+				break;
+			case TYPE_BOUNCEBUSHES:
+				levelfile << "TYPE_BOUNCEBUSHES\n";
+				break;
+			case TYPE_SWINGBLADE:
+				levelfile << "TYPE_SWINGBLADE\n";
+				break;
+			case TYPE_WOLFLEFT:
+				levelfile << "TYPE_WOLFLEFT\n";
+				break;
+			case TYPE_WOLFRIGHT:
+				levelfile << "TYPE_WOLFRIGHT\n";
 				break;
 
 		}
