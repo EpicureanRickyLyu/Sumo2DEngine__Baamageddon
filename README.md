@@ -1,4 +1,5 @@
 # Baamageddon
+* Modify Load and Save data strategy for Cradle
 * Move Attribute from MainGame.cpp to MainGame.hpp
 * Add GameObject folder for All new GameObject hpp
 * Enabled LFS for Repo
@@ -8,4 +9,5 @@
 * Exit Doughnut and Sprinker
 * Bouncy Bushes & Left Right Wolf
 * Hold to Jump Higher
-* Swinging Blade & Half Island Impacts
+* SwingingBlade & Island Impacts
+* Customize Cradle for Editor, modify Load and Save Strategy
