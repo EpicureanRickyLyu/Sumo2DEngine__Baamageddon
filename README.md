@@ -1,6 +1,6 @@
 # Baamageddon
 ## -- Version --
-Visual Studio 2022 C++17, Please try to run on release mode, Debug mode sometimes broken (a few time)   
+Visual Studio 2022 (v143) C++17, Please try to run on release mode, Debug mode sometimes broken (a few time)   
 The issue seems relate to Doughnuts List, haven't found out sorry
 ## Project Changes
 * Move Attribute from MainGame.cpp to MainGame.hpp
