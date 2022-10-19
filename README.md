@@ -1,9 +1,14 @@
 # Baamageddon
-* Modify Load and Save data strategy for Cradle
 * Move Attribute from MainGame.cpp to MainGame.hpp
 * Add GameObject folder for All new GameObject hpp
 * Enabled LFS for Repo
 * Add VS .gitignore
+* Modify Load and Save data strategy for Cradle
+-  <img src="/img/img2.png" height=40% width=40%> <img src="/img/img1.png" height=40% width=40%>
+
+
+
+
 ## Achieved Feature (Editor and MainGame)
 * Add Spikes & Spinning Blade 
 * Add Exit Doughnut and Sprinker
