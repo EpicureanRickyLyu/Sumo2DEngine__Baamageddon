@@ -17,6 +17,9 @@ void InitializeBlade()
 void UpdateSpinningBlade()
 {
 	GameObject& obj_sheep = Play::GetGameObjectByType(TYPE_SHEEP);
+
+
+
 	std::vector<int> obj_SpinningBlades = Play::CollectGameObjectIDsByType(TYPE_SPINNINGBLADE);
 	//std::vector<int> obj_Hazards = Play::CollectGameObjectIDsByType(TYPE_);
 	std::vector<int> obj_Markers = Play::CollectGameObjectIDsByType(TYPE_MARKER);
@@ -46,6 +49,18 @@ void UpdateSpinningBlade()
 			{
 					obj_blade.velocity = -obj_blade.velocity;
 					obj_blade.rotSpeed = -obj_blade.rotSpeed;
+			}
+		}
+		//other blade
+		for (int idother_balde : obj_SpinningBlades)
+		{
+			GameObject& other_balde = Play::GetGameObject(idother_balde);
+			if (other_balde.GetId() == id_balde)
+				continue;
+			if (Play::IsColliding(obj_blade, other_balde))
+			{
+				obj_blade.velocity = -obj_blade.velocity;
+				obj_blade.rotSpeed = -obj_blade.rotSpeed;
 			}
 		}
 		Play::UpdateGameObject(obj_blade);

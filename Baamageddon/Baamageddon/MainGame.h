@@ -50,6 +50,8 @@ constexpr const char* BOUNCYBUSH_SPRITE_NAME = "spr_bouncy_bush_4";
 constexpr const char* SWINGINGBLADE_SPRITE_NAME = "spr_swinging_blade";
 constexpr const char* WORFLEFT_SPRITE_NAME = "spr_wolf_left_3";
 constexpr const char* WORFRIGHT_SPRITE_NAME = "spr_wolf_right_3";
+constexpr const char* SWINGSPIKES_SPRITE_NAME = "spr_swinging_spikes";
+constexpr const char* ROPE_SPRITE_NAME = "spr_rope";
 
 //-------------------------------------------------------------------------
 
@@ -98,10 +100,18 @@ enum GameObjectType
 	TYPE_SWINGBLADE,
 	TYPE_WOLFLEFT,
 	TYPE_WOLFRIGHT,
+	TYPE_SWINGSPIKES,
+	TYPE_ROPE,
 }; 
 
 //-------------------------------------------------------------------------
-
+struct Cradle
+{
+	int id_CenterObj = -1;
+	std::pair<int, Vector2D> blade;
+	//std::vector<int> Children;
+	std::pair<int, Vector2D> Rope;//id, pos {0,-200}
+};
 //ID Can't get GameObject don't know why...
 struct Platform
 {
@@ -120,9 +130,12 @@ struct GameState
 	SheepDirection sheepDirection = DIRECTION_RIGHT;
 	std::vector< Platform > vPlatforms;
 	Point2f cameraTarget{ 0.0f, 0.0f };
-	//properties
+	//************properties************
 	int DoughnutsNum = 0;
 	Vector2D BouncePlatformPos;
+	int BouncePlatformID = 0;
+	std::vector<Cradle> cradles;//id and pos
+	Point2f RopeOffset = { 0.0f, -200.0f };
 }; 
 
 //-------------------------------------------------------------------------

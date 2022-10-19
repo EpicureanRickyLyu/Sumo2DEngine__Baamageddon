@@ -199,6 +199,7 @@
   <ItemGroup>
     <ClInclude Include="..\Play.h" />
     <ClInclude Include="AABB.h" />
+    <ClInclude Include="GameObject\Cradle.h" />
     <ClInclude Include="GameObject\BounceBushes.h" />
     <ClInclude Include="GameObject\ExitDoughnut.h" />
     <ClInclude Include="GameObject\SpinningBlade.h" />

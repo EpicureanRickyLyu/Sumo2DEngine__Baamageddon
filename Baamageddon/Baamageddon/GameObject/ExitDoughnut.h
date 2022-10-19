@@ -21,6 +21,12 @@ void UpdateExitDoughnut()
 		{
 			int id = Play::CreateGameObject(TYPE_SPRINKLE, obj_Doughnut.pos, 0, SPRINKLE_SPRITE_NAME);
 			Play::ColourSprite(SPRINKLE_SPRITE_NAME, color[Play::RandomRollRange(0, 3)]);
+			//Maybe better set up three new Sprinkle in three different color 
+			//Then randomly create three Sprinkles
+			//instead of calling every frame
+			//Cause this will consume a lot of performance?
+			//the visual effect sort of not bad though
+			//Haven't come up other ideas to overwrite this
 			GameObject& obj_sprinkle = Play::GetGameObject(id);
 			obj_sprinkle.rotSpeed = 0.5f;
 			obj_sprinkle.acceleration = { 0.0f, 0.2f };

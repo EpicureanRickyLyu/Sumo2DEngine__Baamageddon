@@ -41,6 +41,8 @@ constexpr const char* BOUNCYBUSH_SPRITE_NAME = "spr_bouncy_bush_4";
 constexpr const char* SWINGINGBLADE_SPRITE_NAME = "spr_swinging_blade";
 constexpr const char* WORFLEFT_SPRITE_NAME = "spr_wolf_left_3";
 constexpr const char* WORFRIGHT_SPRITE_NAME = "spr_wolf_right_3";
+constexpr const char* SWINGSPIKES_SPRITE_NAME = "spr_swinging_spikes";
+constexpr const char* ROPE_SPRITE_NAME = "spr_rope";
 
 enum GameObjectType
 {
@@ -57,6 +59,9 @@ enum GameObjectType
 	TYPE_SWINGBLADE,
 	TYPE_WOLFLEFT,
 	TYPE_WOLFRIGHT,
+	TYPE_SWINGSPIKES,
+	TYPE_ROPE,
+	TYPE_CRADLE,
 	//***********NEW Type***********
 	TOTAL_TYPES
 };
@@ -75,18 +80,33 @@ const char* SPRITE_NAMES[TOTAL_TYPES][4] =
 	{ SWINGINGBLADE_SPRITE_NAME,SWINGINGBLADE_SPRITE_NAME,SWINGINGBLADE_SPRITE_NAME,SWINGINGBLADE_SPRITE_NAME },
 	{ WORFLEFT_SPRITE_NAME,WORFLEFT_SPRITE_NAME,WORFLEFT_SPRITE_NAME,WORFLEFT_SPRITE_NAME },
 	{ WORFRIGHT_SPRITE_NAME,WORFRIGHT_SPRITE_NAME,WORFRIGHT_SPRITE_NAME,WORFRIGHT_SPRITE_NAME },
+	{ SWINGSPIKES_SPRITE_NAME,SWINGSPIKES_SPRITE_NAME,SWINGSPIKES_SPRITE_NAME,SWINGSPIKES_SPRITE_NAME },
+	{ ROPE_SPRITE_NAME,ROPE_SPRITE_NAME,ROPE_SPRITE_NAME,ROPE_SPRITE_NAME },
 
 
+};
+
+//*************Cradle struct**************
+struct Cradle
+{
+	int id_CenterObj = -1;
+	std::pair<int, Vector2D> blade;
+	//std::vector<int> Children;
+	std::pair<int, Vector2D> Rope;//id, pos {0,-200}
 };
 
 struct EditorState
 {
 	int score = 0;
-	GameObjectType editMode = TYPE_BOUNCEBUSHES;
+	GameObjectType editMode = TYPE_SWINGSPIKES;
 	Point2f cameraTarget{ 0.0f, 0.0f };
 	float zoom = 1.0f;
 	int selectedObj = -1;
-	Point2f selectedOffset{ 0.0f, 0.0f };
+	//*************Cradles list**************
+	std::vector<Cradle> cradles;//id and pos
+	Point2f RopeOffset = { 0.0f, -200.0f };
+	Point2f selectedOffset{ 0.0f, 0.0f };// offset {0,-200}
+	//
 	int saveCooldown = 0;
 };
 
@@ -186,7 +206,9 @@ void HandleControls( void )
 			case TYPE_BOUNCEBUSHES: editorState.editMode = TYPE_SWINGBLADE; break;
 			case TYPE_SWINGBLADE: editorState.editMode = TYPE_WOLFLEFT; break;
 			case TYPE_WOLFLEFT: editorState.editMode = TYPE_WOLFRIGHT; break;
-			case TYPE_WOLFRIGHT: editorState.editMode = TYPE_SHEEP; break;
+			case TYPE_WOLFRIGHT: editorState.editMode = TYPE_SWINGSPIKES; break;
+			case TYPE_SWINGSPIKES: editorState.editMode = TYPE_ROPE; break;
+			case TYPE_ROPE: editorState.editMode = TYPE_SHEEP; break;
 		}
 		editorState.selectedObj = -1;
 	}
@@ -217,9 +239,23 @@ void HandleControls( void )
 					case TYPE_SHEEP:
 						Play::GetGameObjectByType( TYPE_SHEEP ).pos = mouseWorldPos;
 						break;
+					//*********************New Type***************************************
 					case TYPE_EXIT:
 						Play::GetGameObjectByType(TYPE_EXIT).pos = mouseWorldPos;
 						break;
+					case TYPE_SWINGSPIKES:
+						editorState.selectedObj = Play::CreateGameObject(TYPE_SWINGSPIKES, mouseWorldSnapPos, 50, SPRITE_NAMES[static_cast<int>(editorState.editMode)][0]);
+						editorState.cradles.emplace_back(Cradle{
+							editorState.selectedObj,
+							std::pair<int, Vector2D>{editorState.selectedObj,Play::GetGameObject(editorState.selectedObj).pos},
+							std::pair<int, Vector2D>{
+							Play::CreateGameObject(TYPE_ROPE, 
+							{ mouseWorldSnapPos.x,mouseWorldSnapPos.y - 200 }, 0, SPRITE_NAMES[static_cast<int>(TYPE_ROPE)][0]),
+							{ mouseWorldSnapPos.x,mouseWorldSnapPos.y - 200 }}
+							});//rope {id, pos}
+						//editorState.selectedOffset = { 0.0f, 0.0f };
+						break;
+					//*********************New Type***************************************
 					default:
 						editorState.selectedObj = Play::CreateGameObject( editorState.editMode, mouseWorldSnapPos, 50, SPRITE_NAMES[static_cast<int>( editorState.editMode )][0] );
 						editorState.selectedOffset = { 0.0f, 0.0f };
@@ -230,9 +266,23 @@ void HandleControls( void )
 		}
 		else
 		{
+
 			GameObject& obj = Play::GetGameObject( editorState.selectedObj );
 			obj.pos = mouseWorldSnapPos + editorState.selectedOffset;
+			//**********iterator to check if click the cradle***************
+			for (auto& cradle : editorState.cradles)
+			{
+				if (cradle.id_CenterObj == editorState.selectedObj)
+				{
+					GameObject& rope = Play::GetGameObject(cradle.Rope.first);
+					rope.pos = obj.pos + editorState.RopeOffset;
 
+					cradle.Rope.second = rope.pos;
+					cradle.blade.second = obj.pos;
+				}
+			}
+			//**********iterator to check if click the cradle***************
+			
 			if( Play::KeyDown( '1' ) )
 				obj.spriteId = Play::GetSpriteId( SPRITE_NAMES[static_cast<int>( editorState.editMode )][0] );
 
@@ -253,6 +303,33 @@ void HandleControls( void )
 
 	if( Play::GetMouseButton( Play::RIGHT ) )
 	{
+		if (editorState.editMode == TYPE_SWINGSPIKES)
+		{
+			//**********iterator to check if click the center cradle***************
+			if (!editorState.cradles.empty())
+			{
+				//auto ptr = editorState.cradles.begin();
+
+				for (int i = 0; i < editorState.cradles.size(); i++)
+				{
+					//right click center
+					GameObject& obj = Play::GetGameObject(editorState.cradles[i].id_CenterObj);
+					if (PointInsideSpriteBounds(mouseWorldPos, obj))
+					{
+						if (obj.type != TYPE_SHEEP && obj.type != TYPE_EXIT)
+						{
+							Play::DestroyGameObject(editorState.cradles[i].Rope.first);
+							Play::DestroyGameObject(editorState.cradles[i].id_CenterObj);
+							editorState.cradles.erase(editorState.cradles.begin() + i);///pointer Cause fatal error ? ?
+							i--;
+							//erase inside forloop remember backword pointer
+						}
+					}
+				}
+			}
+			//**********iterator to check if click the cradle***************
+		}
+		else
 		for( int id : Play::CollectGameObjectIDsByType( editorState.editMode ) )
 		{
 			GameObject& obj = Play::GetGameObject( id );
@@ -284,7 +361,8 @@ void DrawScene( void )
 	DrawObjectsOfType(TYPE_SWINGBLADE);
 	DrawObjectsOfType(TYPE_WOLFLEFT);
 	DrawObjectsOfType(TYPE_WOLFRIGHT);
-
+	DrawObjectsOfType(TYPE_SWINGSPIKES);
+	DrawObjectsOfType(TYPE_ROPE);
 	if( editorState.selectedObj != -1 )
 	{
 		GameObject& obj = Play::GetGameObject( editorState.selectedObj );
@@ -316,6 +394,8 @@ void DrawUserInterface( void )
 		case TYPE_SWINGBLADE: sMode = "SWINGBLADE"; break;
 		case TYPE_WOLFLEFT: sMode = "WOLFLEFT"; break;
 		case TYPE_WOLFRIGHT: sMode = "WOLFRIGHT"; break;
+		case TYPE_SWINGSPIKES: sMode = "SWINGSPIKES"; break;
+		case TYPE_ROPE: sMode = "ROPES"; break;
 	}
 
 	Play::DrawRect( { 0, 0 }, { DISPLAY_WIDTH, 50 }, Play::cYellow, true );
@@ -391,7 +471,9 @@ void LoadLevel( void )
 
 	while( !levelfile.eof() )
 	{
-		std::getline( levelfile, sType );
+		std::getline(levelfile, sType);
+		if (sType == "Cradles")
+			break;
 		std::getline( levelfile, sX );
 		std::getline( levelfile, sY );
 		std::getline( levelfile, sSprite );
@@ -421,6 +503,34 @@ void LoadLevel( void )
 			Play::CreateGameObject(TYPE_WOLFLEFT, { std::stof(sX), std::stof(sY) }, 40, sSprite.c_str());
 		if (sType == "TYPE_WOLFRIGHT")
 			Play::CreateGameObject(TYPE_WOLFRIGHT, { std::stof(sX), std::stof(sY) }, 40, sSprite.c_str());
+		//if (sType == "TYPE_SWINGSPIKES")
+		//{
+		//	Play::CreateGameObject(TYPE_SWINGSPIKES, { std::stof(sX), std::stof(sY) }, 50, sSprite.c_str());
+		//}
+		//if (sType == "TYPE_ROPE")
+		//{
+		//	Play::CreateGameObject(TYPE_ROPE, { std::stof(sX), std::stof(sY) }, 0, sSprite.c_str());
+		//}
+
+	}
+	//read cradle
+	std::string bx, by, rx, ry;
+	while (!levelfile.eof())
+	{
+
+		std::getline(levelfile, bx);
+		if (bx == "")
+			break;
+		std::getline(levelfile, by);
+		int id = Play::CreateGameObject(TYPE_SWINGSPIKES, { std::stof(bx), std::stof(by) }, 50, SWINGSPIKES_SPRITE_NAME);
+		std::getline(levelfile, rx);
+		std::getline(levelfile, ry);
+		int ropeid = Play::CreateGameObject(TYPE_ROPE, { std::stof(rx), std::stof(ry) }, 0, ROPE_SPRITE_NAME);
+		editorState.cradles.emplace_back(Cradle{
+			id,
+			std::pair<int, Vector2D>{id,Play::GetGameObject(id).pos},
+			std::pair<int, Vector2D>{ropeid,{ std::stof(rx), std::stof(ry)}}
+			});//rope {id, pos}
 
 	}
 
@@ -475,12 +585,25 @@ void SaveLevel( void )
 			case TYPE_WOLFRIGHT:
 				levelfile << "TYPE_WOLFRIGHT\n";
 				break;
-
+			//case TYPE_SWINGSPIKES:
+			//	levelfile << "TYPE_SWINGSPIKES\n";
+			//	break;
+			//case TYPE_ROPE:
+			//	levelfile << "TYPE_ROPE\n";
+			//	break;
 		}
+		if (obj.type == TYPE_SWINGSPIKES || obj.type == TYPE_ROPE)
+			continue;
 		levelfile << std::to_string( obj.pos.x ) + "f\n" << std::to_string( obj.pos.y ) + "f\n";
 		levelfile << Play::GetSpriteName( obj.spriteId ) << "\n";
 	}
-	
+	//save cradle
+	levelfile << "Cradles\n";
+	for (auto& cradle : editorState.cradles)
+	{
+		levelfile << std::to_string(cradle.blade.second.x) << "f\n" << std::to_string(cradle.blade.second.y) << "f\n";
+		levelfile << std::to_string(cradle.Rope.second.x) << "f\n" << std::to_string(cradle.Rope.second.y) << "f\n";
+	}
 	levelfile.close();
 
 	editorState.saveCooldown = 100;

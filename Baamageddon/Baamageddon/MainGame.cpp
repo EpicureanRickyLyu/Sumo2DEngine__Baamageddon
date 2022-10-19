@@ -14,6 +14,7 @@
 #include "GameObject/BounceBushes.h"
 #include "GameObject/Wolf.h"
 #include "GameObject/SwingingBlade.h"
+#include "GameObject/Cradle.h"
 // The entry point for a PLay program
 void MainGameEntry( PLAY_IGNORE_COMMAND_LINE )
 {
@@ -26,7 +27,7 @@ void MainGameEntry( PLAY_IGNORE_COMMAND_LINE )
 	CreatePlatforms();
 	gameState.cameraTarget = Point2f( DISPLAY_WIDTH, DISPLAY_HEIGHT ) - Point2f( DISPLAY_WIDTH / 2.0f, DISPLAY_HEIGHT / 2.0f);
 	Play::SetCameraPosition( gameState.cameraTarget );
-	//Move Origin For SwingBlade
+	//*************Move Origin For SwingBlade*****************
 	IntilizeSwingBlade();
 }
 
@@ -42,7 +43,7 @@ bool MainGameUpdate(float elapsedTime)
 
 	Play::BeginTimingBar( Play::cBlue );
 
-
+	//****UpdatePlatform in DrawScene*******
 	DrawScene();
 
 
@@ -59,6 +60,7 @@ bool MainGameUpdate(float elapsedTime)
 	UpdateLeftWolf();
 	UpdateRighttWolf();
 	UpdateSwingBlade();
+	UpdateCradle();
 
 
 	Play::SetDrawingSpace( Play::SCREEN );
@@ -146,8 +148,8 @@ void DrawScene()
 void HandlePlatformCollision(GameObject& obj_sheep)
 {
 	AABB sheepAABB = { obj_sheep.pos, SHEEP_COLLISION_HALFSIZE };
-	//debug
-	DrawCollisionBounds(obj_sheep);
+	//***************debug***************************
+	//DrawCollisionBounds(obj_sheep);
 	int hitCount = 0;
 
 	for (const Platform& rPlatform : gameState.vPlatforms )
@@ -175,10 +177,8 @@ void HandlePlatformCollision(GameObject& obj_sheep)
 			{
 
 				obj_sheep.pos = positionOut;
-				///get paltform Pos
-				gameState.BouncePlatformPos = rPlatform.Pos;
-				
-				OnJumpAheadToPlatForm = true;
+				//***************debug***************************
+				//Play::DrawFontText("64px", std::to_string(rPlatform.platform_id), { positionOut.x, positionOut.y - 300 }, Play::CENTRE);
 				// Sheep heading down onto a platform
 				if( obj_sheep.velocity.y > 0.0f )
 				{
@@ -186,6 +186,11 @@ void HandlePlatformCollision(GameObject& obj_sheep)
 					gameState.sheepState = STATE_IDLE;
 					obj_sheep.velocity.y = 0.f;
 					obj_sheep.acceleration.y = 0.f;
+					///*************get paltform Pos****************
+					gameState.BouncePlatformPos = rPlatform.Pos;
+					gameState.BouncePlatformID = rPlatform.platform_id;
+					OnJumpAheadToPlatForm = true;
+					///*************get paltform Pos****************
 				}
 				else // Sheep heading up into a platform
 				{
@@ -217,6 +222,8 @@ void HandlePlatformCollision(GameObject& obj_sheep)
 	// We missed all platforms
 	if (gameState.sheepState != STATE_AIRBORNE)
 	{
+		/*if (OnBlade)
+			return;*/
 		obj_sheep.velocity.y = 0.f;
 		SetAirborne(obj_sheep);
 	}
@@ -413,7 +420,7 @@ void UpdateDoughnuts()
 			Play::DestroyGameObject(id_doughnut);
 		doughnutsNums++;
 	}
-	//Record nums in game state
+	//***************Record nums in game state****************
 	gameState.DoughnutsNum = doughnutsNums;
 
 }
@@ -444,7 +451,7 @@ void UpdateGamePlayState()
 		return;
 
 	case STATE_APPEAR:
-		//Initilize Game
+		//**************Initilize Blade*****************
 		InitializeBlade();
 		//
 
@@ -575,6 +582,8 @@ void LoadLevel( void )
 	while( !levelfile.eof() )
 	{
 		std::getline( levelfile, sType );
+		if (sType == "Cradles")
+			break;
 		std::getline( levelfile, sX );
 		std::getline( levelfile, sY );
 		std::getline( levelfile, sSprite );
@@ -605,6 +614,26 @@ void LoadLevel( void )
 		if (sType == "TYPE_WOLFRIGHT")
 			Play::CreateGameObject(TYPE_WOLFRIGHT, { std::stof(sX), std::stof(sY) }, 60, sSprite.c_str());
 	
+	}
+	//read cradle
+	std::string bx, by, rx, ry;
+	while (!levelfile.eof())
+	{
+
+		std::getline(levelfile, bx);
+		if (bx == "")
+			break;
+		std::getline(levelfile, by);
+		int id = Play::CreateGameObject(TYPE_SWINGSPIKES, { std::stof(bx), std::stof(by) }, 50, SWINGSPIKES_SPRITE_NAME);
+		std::getline(levelfile, rx);
+		std::getline(levelfile, ry);
+		int ropeid = Play::CreateGameObject(TYPE_ROPE, { std::stof(rx), std::stof(ry) }, 0, ROPE_SPRITE_NAME);
+		gameState.cradles.emplace_back(Cradle{
+			id,
+			std::pair<int, Vector2D>{id,Play::GetGameObject(id).pos},
+			std::pair<int, Vector2D>{ropeid,{ std::stof(rx), std::stof(ry)}}
+			});//rope {id, pos}
+
 	}
 
 	levelfile.close();
