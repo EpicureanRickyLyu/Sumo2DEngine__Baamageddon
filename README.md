@@ -5,9 +5,10 @@
 * Enabled LFS for Repo
 * Add VS .gitignore
 ## Achieved Feature (Editor and MainGame)
-* Spikes & Spinning Blade 
-* Exit Doughnut and Sprinker
-* Bouncy Bushes & Left Right Wolf
-* Hold to Jump Higher
-* SwingingBlade & Island Impacts
+* Add Spikes & Spinning Blade 
+* Add Exit Doughnut and Sprinker
+* Add Bouncy Bushes & Left Right Wolf
+* Add Hold to Jump Higher
+* Add SwingingBlade (Move Sprite Origin)
+* Add Bouce strength for Paltform
 * Customize Cradle for Editor, modify Load and Save Strategy
