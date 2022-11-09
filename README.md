@@ -19,6 +19,6 @@ The issue seems relate to Doughnuts List, haven't found out sorry
 * Add Bouncy Bushes & Left Right Wolf
 * Add Hold to Jump Higher
 * Add SwingingBlade (Move Sprite Origin)
-* Add Bouce strength for Paltform (Don't know why platform id changed after creating)
+* Add Bouce strength for Paltform 
 * Customize Cradle for Editor, modify Load and Save Strategy
-* Add Cradle Walkable and trigger damage feature (fail to add swing)
+* Add Cradle Walkable and trigger damage feature 
